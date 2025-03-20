@@ -1,0 +1,32 @@
+from kafka import KafkaConsumer, KafkaProducer
+import json
+
+TOPIC = "sensor-readings"
+ALERTS_TOPIC = "alerts"
+KAFKA_BROKER = "localhost:9092"
+
+consumer = KafkaConsumer(
+    TOPIC,
+    bootstrap_servers=KAFKA_BROKER
+)
+
+producer = KafkaProducer(
+    bootstrap_servers=KAFKA_BROKER
+)
+
+print("Listening for sensor data...")
+
+for message in consumer:
+    data = json.loads(message.value)
+    temperature = data["temperature"]
+    humidity = data["humidity"]
+
+    print(f"Received temperature of {temperature} and humidity of {humidity}")
+
+    if temperature > 37:
+        alert = {"type": "temperature", "value": temperature}
+        producer.send(ALERTS_TOPIC, json.dumps(alert).encode())
+
+    if humidity > 30:
+        alert = {"type": "humidity", "value": humidity}
+        producer.send(ALERTS_TOPIC, json.dumps(alert).encode())
