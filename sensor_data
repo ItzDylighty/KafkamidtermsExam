@@ -1,0 +1,26 @@
+import json
+import fastapi
+from kafka import KafkaProducer
+
+app = fastapi.FastAPI()
+
+TOPIC = "sensor-readings"
+KAFKA_BROKER = "localhost:9092"
+
+producer = KafkaProducer(
+    bootstrap_servers=KAFKA_BROKER
+)
+
+@app.post("/sensor-data")
+def send_sensor_data(temperature: float, humidity: float):
+    data = {
+        "temperature": temperature,
+        "humidity": humidity
+    }
+    
+    producer.send(TOPIC, json.dumps(data).encode())
+    return {"message": "Sensor data published"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=5000)
