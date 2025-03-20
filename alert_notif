@@ -1,0 +1,19 @@
+from kafka import KafkaConsumer
+import json
+
+ALERTS_TOPIC = "alerts"
+KAFKA_BROKER = "localhost:9092"
+
+consumer = KafkaConsumer(
+    ALERTS_TOPIC,
+    bootstrap_servers=KAFKA_BROKER
+)
+
+print("Listening for alerts...")
+
+for message in consumer:
+    alert = json.loads(message.value)
+    if alert["type"] == "temperature":
+        print(f"Exceeds threshold for temperature with value {alert['value']}")
+    elif alert["type"] == "humidity":
+        print(f"Exceeds threshold for humidity with value {alert['value']}")
